@@ -17,15 +17,16 @@ export function Quiz({ onComplete }: { onComplete: () => void }) {
   });
   const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [userInput, setUserInput] = useState('');
+  const [inputSubmitted, setInputSubmitted] = useState(false);
 
   const currentQuestion = questions[quizState.currentQuestionIndex];
+  const isFillInTheBlank = quizState.currentQuestionIndex >= 5; // Questions 6-10 are fill-in-the-blank
 
-  const handleAnswer = useCallback((answerIndex: number) => {
-    if (showCorrectAnswer) return; // Prevent multiple answers
-
+  const handleAnswer = useCallback((answerIndex: number | string) => {
+    if (showCorrectAnswer) return;
     setShowCorrectAnswer(true);
     
-    // Show correct answer for 1.5 seconds before moving to next question
     setTimeout(() => {
       setIsTransitioning(true);
       
@@ -61,16 +62,23 @@ export function Quiz({ onComplete }: { onComplete: () => void }) {
 
         setShowCorrectAnswer(false);
         setIsTransitioning(false);
-      }, 300); // Transition duration
+        setUserInput('');
+        setInputSubmitted(false);
+      }, 300);
     }, 1500);
   }, [showCorrectAnswer]);
+
+  const handleInputSubmit = () => {
+    setInputSubmitted(true);
+    handleAnswer(userInput.trim().toLowerCase());
+  };
 
   const handleTimeout = useCallback(() => {
     if (!showCorrectAnswer) {
       setShowCorrectAnswer(true);
-      setTimeout(() => handleAnswer(-1), 1500);
+      setTimeout(() => handleAnswer(isFillInTheBlank ? "" : -1), 1500);
     }
-  }, [handleAnswer, showCorrectAnswer]);
+  }, [handleAnswer, showCorrectAnswer, isFillInTheBlank]);
 
   useEffect(() => {
     if (quizState.isComplete) {
@@ -98,57 +106,67 @@ export function Quiz({ onComplete }: { onComplete: () => void }) {
 
       <div className="mb-8">
         <p className="text-lg mb-4">{currentQuestion.question}</p>
-        <div className="space-y-3">
-          {currentQuestion.options.map((option, index) => {
-            const isCorrect = index === currentQuestion.correctAnswer;
-            const isSelected = quizState.answers[quizState.currentQuestionIndex] === index;
-            const shouldShowCorrect = showCorrectAnswer && isCorrect;
-            
-            return (
-              <button
-                key={index}
-                onClick={() => handleAnswer(index)}
-                disabled={showCorrectAnswer}
-                className={clsx(
-                  "w-full p-4 text-left rounded-lg transition-all duration-300",
-                  "hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500",
-                  shouldShowCorrect && "bg-green-100 ring-2 ring-green-500",
-                  isSelected && !shouldShowCorrect && (isCorrect ? "bg-green-100" : "bg-red-100"),
-                  showCorrectAnswer && !isCorrect && "opacity-50"
+        {isFillInTheBlank ? (
+          <div>
+            <input
+              type="text"
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
+              disabled={inputSubmitted}
+              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              onClick={handleInputSubmit}
+              disabled={inputSubmitted}
+              className="mt-3 w-full p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            >
+              Submit
+            </button>
+            {inputSubmitted && (
+              <div className={`mt-3 p-3 rounded-lg ${userInput.trim().toLowerCase() === currentQuestion.correctAnswer ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                {userInput.trim().toLowerCase() === currentQuestion.correctAnswer ? (
+                  <>
+                    <CheckCircle className="inline w-5 h-5 mr-2 text-green-600" /> Correct Answer!
+                  </>
+                ) : (
+                  <>
+                    <XCircle className="inline w-5 h-5 mr-2 text-red-600" /> Incorrect! The correct answer is: {currentQuestion.correctAnswer}
+                  </>
                 )}
-              >
-                <div className="flex items-center gap-2">
-                  {(isSelected || shouldShowCorrect) && (
-                    isCorrect ? 
-                      <CheckCircle className="w-5 h-5 text-green-600" /> :
-                      <XCircle className="w-5 h-5 text-red-600" />
-                  )}
-                  <span>{option}</span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {showCorrectAnswer && quizState.answers[quizState.currentQuestionIndex] === -1 && (
-        <div className="mb-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-          <div className="flex items-center gap-2 text-yellow-800">
-            <Clock className="w-5 h-5" />
-            <span>Time's up! The correct answer is highlighted above.</span>
+              </div>
+            )}
           </div>
-        </div>
-      )}
-
-      <div className="flex justify-between items-center">
-        <div className="h-2 bg-gray-200 rounded-full flex-1 mr-4">
-          <div
-            className="h-2 bg-blue-500 rounded-full transition-all duration-300"
-            style={{
-              width: `${((quizState.currentQuestionIndex + 1) / questions.length) * 100}%`,
-            }}
-          />
-        </div>
+        ) : (
+          <div className="space-y-3">
+            {currentQuestion.options.map((option, index) => {
+              const isCorrect = index === currentQuestion.correctAnswer;
+              const isSelected = quizState.answers[quizState.currentQuestionIndex] === index;
+              const shouldShowCorrect = showCorrectAnswer && isCorrect;
+              
+              return (
+                <button
+                  key={index}
+                  onClick={() => handleAnswer(index)}
+                  disabled={showCorrectAnswer}
+                  className={clsx(
+                    "w-full p-4 text-left rounded-lg transition-all duration-300",
+                    "hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500",
+                    shouldShowCorrect && "bg-green-100 ring-2 ring-green-500",
+                    isSelected && !shouldShowCorrect && (isCorrect ? "bg-green-100" : "bg-red-100"),
+                    showCorrectAnswer && !isCorrect && "opacity-50"
+                  )}
+                >
+                  <div className="flex items-center gap-2">
+                    {(isSelected || shouldShowCorrect) && (
+                      isCorrect ? <CheckCircle className="w-5 h-5 text-green-600" /> : <XCircle className="w-5 h-5 text-red-600" />
+                    )}
+                    <span>{option}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
