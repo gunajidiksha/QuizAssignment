@@ -58,5 +58,41 @@ export const questions = [
     question:"Simplify: (144/sqrt(144)) + sqrt(225)",
     options: ["22","24","26","28"],
     correctAnswer: 3
-  }
+  },
+  {
+    id:11,
+    question:"A train leaves City A at 6:00 AM at 60 km/h. Another train leaves City B towards A at 7:00 AM at 80 km/h. The cities are 300 km apart. At what time will they meet?",
+    options: ["8:30 AM","8:45 AM","9:00 AM","9:15 AM"],
+    correctAnswer: 2
+  },
+  {
+    id:12,
+    question:"Simplify: 3(1/4)*2(2/3)",
+    options: ["8.5","8.6","8.666...","8.75"],
+    correctAnswer: 3
+  },
+  {
+    id:13,
+    question:"A man walks 1 km in 12 minutes. How many kilometers will he walk in 2 hours 24 minutes?",
+    options: ["12 km","13 km","14 km","15 km"],
+    correctAnswer: 3
+  },
+  {
+    id:14,
+    question:"Simplify: 5/12+7/18",
+    options: ["43/36","53/36","61/36","67/36"],
+    correctAnswer: 2
+  },
+  {
+    id:15,
+    question:"A car travels 150 km at a uniform speed. If the speed had been 10 km/h more, it would have taken 30 minutes less. Find the speed.",
+    options: ["40 km/h","45 km/h","50 km/h","60 km/h"],
+    correctAnswer: 2
+  },
+  {
+    id:16,
+    question:"Simplify: 18(2/3) / 2(1/2)",
+    options: ["7.25","7.4","7.45","7.5"],
+    correctAnswer: 4
+  },
 ];
