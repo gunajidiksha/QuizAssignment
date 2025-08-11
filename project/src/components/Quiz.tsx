@@ -6,7 +6,7 @@ import { saveAttempt } from '../utils/db';
 import { CheckCircle, XCircle, Clock } from 'lucide-react';
 import clsx from 'clsx';
 
-const SECONDS_PER_QUESTION = 30;
+const SECONDS_PER_QUESTION = 120;
 
 export function Quiz({ onComplete }: { onComplete: () => void }) {
   const [quizState, setQuizState] = useState<QuizState>({
